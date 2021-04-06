@@ -1,0 +1,695 @@
+openapi: 3.0.1
+info:
+  title: UpsellGuru Public API
+  version: 1.0.0
+servers:
+  - url: 'https://api.upsellguru.com'
+
+tags:
+  - name: hotels
+    description: Hotels configured in UpsellGuru
+  - name: roomTypes
+    description: Room Types configured in UpsellGuru
+  - name: extraTypes
+    description: Extra Types configured in UpsellGuru
+  - name: upgradeBids
+    description: Upgrade Bids placed on UpsellGuru
+  - name: bookedExtras
+    description: Booked Extras purchased on UpsellGuru
+
+paths:
+  /hotels:
+    get:
+      tags:
+        - hotels
+      operationId: getHotels
+      description: Retrieve list of hotels the API account has access to
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfHotel'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /upgrade_bids:
+    get:
+      tags:
+        - upgradeBids
+      operationId: getUpgradeBidsList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+        - in: query
+          name: dateFrom
+          required: true
+          description: Transaction date from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          required: true
+          description: Transaction date to
+          schema:
+            type: string
+            format: date
+      description: Retrieve list of upgrade bids by hotel Id the API account has access to
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUpgradeBid'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /booked_extras:
+    get:
+      tags:
+        - bookedExtras
+      operationId: getBookedExtrasList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+        - in: query
+          name: dateFrom
+          required: true
+          description: Transaction date from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          required: true
+          description: Transaction date to
+          schema:
+            type: string
+            format: date
+      description: Retrieve list of upgrade bids by hotel Id the API account has access to
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUpgradeBid'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /room_types:
+    get:
+      tags:
+        - roomTypes
+      operationId: getRoomTypesList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoomType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: []
+  /extra_types:
+    get:
+      tags:
+        - extraTypes
+      operationId: getExtraTypesList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfExtraType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+    ArrayOfHotel:
+      type: array
+      items:
+        $ref: "#/components/schemas/Hotel"
+    Hotel:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/HotelStatus"
+        name:
+          type: string
+        shortName:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        currency:
+          type: string
+        languages:
+          type: array
+          items:
+            format: string
+    HotelStatus:
+      type: string
+      description: Hotel status
+      enum:
+        - ONLINE
+        - OFFLINE
+        - ONBOARDING
+    ReservationLite:
+      type: object
+      properties:
+        id:
+          type: integer
+        checkin:
+          type: string
+          format: date
+        checkout:
+          type: string
+          format: date
+        reference:
+          type: string
+        ratePlan:
+          type: string
+        marketSegment:
+          type: string
+        reservationSource:
+          type: string
+    BookedExtra:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/BookedExtraStatus"
+        extraType:
+          $ref: "#/components/schemas/ExtraTypeLite"
+        amount:
+          $ref: "#/components/schemas/Money"
+        quantity:
+          type: integer
+        reservation:
+          $ref: "#/components/schemas/ReservationLite"
+    BookedExtraStatus:
+      type: string
+      description: This enum describes the possible status a booked extra can be in UpsellGuru
+      enum:
+        - CONFIRMED
+        - REJECTED
+        - PENDING
+        - EXPIRED
+        - CANCELLED
+    ArrayOfBookedExtra:
+      type: array
+      items:
+        $ref: "#/components/schemas/BookedExtra"
+    UpgradeBid:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/UpgradeBidStatus"
+        fromRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        toRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        amount:
+          $ref: "#/components/schemas/Money"
+        strength:
+          type: integer
+          minimum: 0
+          maximum: 4
+        reservation:
+          $ref: "#/components/schemas/ReservationLite"
+    UpgradeBidStatus:
+      type: string
+      description: This enum describes the possible status an upgrade bid can be in UpsellGuru
+      enum:
+        - ACCEPTED
+        - CANCELLED
+        - EXPIRED
+        - PENDING
+        - REJECTED
+    ArrayOfUpgradeBid:
+      type: array
+      items:
+        $ref: "#/components/schemas/UpgradeBid"
+    ArrayOfRoomType:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoomType"
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        hotelId:
+          type: integer
+        status:
+          $ref: "#/components/schemas/RoomTypeStatus"
+        code:
+          type: string
+        pmsTransactionCode:
+          type: string
+          description: Room Type code used to write back to the PMS
+        otherPmsCodes:
+          type: array
+          items:
+            type: string
+          description: Other room type codes that can be used to identify this room type
+        names:
+          $ref: "#/components/schemas/LocalizedStringsMap"
+        descriptions:
+          $ref: "#/components/schemas/LocalizedStringsMap"
+        position:
+          type: integer
+        numberOfRooms:
+          type: integer
+          description: Number of phisical room units belonging to this Room Type
+        isNotMapped:
+          type: boolean
+          description: If true, this room type was created after receiving a reservation with a room type code not previously mapped
+        hasUpgradePricesConfigured:
+          type: boolean
+        pictures:
+          type: array
+          items:
+            $ref: "#/components/schemas/PictureUrl"
+    RoomTypeLite:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+    RoomTypeStatus:
+      type: string
+      description: This enum describes the possible status a room type can be in UpsellGuru
+      enum:
+        - ONLINE
+        - OFFLINE
+        - DELETED
+    ArrayOfExtraType:
+      type: array
+      items:
+        $ref: "#/components/schemas/ExtraType"
+    ExtraType:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        hotelId:
+          type: integer
+        status:
+          $ref: "#/components/schemas/ExtraTypeStatus"
+        code:
+          type: string
+        pmsTransactionCode:
+          type: string
+        otherPmsCodes:
+          type: array
+          items:
+            type: string
+        billingRule:
+          $ref: "#/components/schemas/ExtraTypeBillingRule"
+        salesType:
+          $ref: "#/components/schemas/ExtraTypeSalesType"
+        category:
+          $ref: "#/components/schemas/ExtraTypeCategory"
+        names:
+          $ref: "#/components/schemas/LocalizedStringsMap"
+        descriptions:
+          $ref: "#/components/schemas/LocalizedStringsMap"
+        position:
+          type: integer
+        price:
+          $ref: "#/components/schemas/Money"
+        strikePrice:
+          $ref: "#/components/schemas/Money"
+        taxes:
+          $ref: "#/components/schemas/Money"
+        serviceFee:
+          $ref: "#/components/schemas/Money"
+        pointOfSale:
+          $ref: "#/components/schemas/ExtraTypePointOfSale"
+        cutOffDays:
+          type: integer
+        cutOffHour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        excludedDates:
+          type: array
+          items:
+            format: date
+        availableDates:
+          type: array
+          items:
+            format: date
+        losFrom:
+          type: integer
+        losTo:
+          type: integer
+        excludedRatePlans:
+          type: array
+          items:
+            format: string
+        allowedRatePlans:
+          type: array
+          items:
+            format: string
+        excludedMarketSegment:
+          type: array
+          items:
+            format: string
+        allowedMarketSegent:
+          type: array
+          items:
+            format: string
+        excludedReservationSource:
+          type: array
+          items:
+            format: string
+        allowedReservationSource:
+          type: array
+          items:
+            format: string
+        excludedMembershipLevel:
+          type: array
+          items:
+            format: string
+        allowedMembershipLevel:
+          type: array
+          items:
+            format: string
+        offeredDays:
+          $ref: "#/components/schemas/ExtraTypeOfferedDays"
+        offeredDaysType:
+          $ref: "#/components/schemas/ExtraTypeOfferedDaysType"
+        dayTimeConfirmation:
+          $ref: "#/components/schemas/ExtraTypeDayTimeConfirmation"
+        dayTimeConfirmationSchedule:
+          $ref: "#/components/schemas/ExtraTypeDayTimeConfirmationSchedule"
+        customQuestion:
+          type: string
+        isPurchasingMultipleVariationsAllowed:
+          type: boolean
+        variations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtraTypeVariation"
+        pictures:
+          type: array
+          items:
+            $ref: "#/components/schemas/PictureUrl"
+    ExtraTypeLite:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        category:
+          $ref: "#/components/schemas/ExtraTypeCategory"
+    ExtraTypeStatus:
+      type: string
+      description: This enum describes the possible status an extra type can be in UpsellGuru
+      enum:
+        - ONLINE
+        - OFFLINE
+        - DELETED
+    ExtraTypeBillingRule:
+      type: string
+      enum:
+        - PERSON
+        - DAY_PERSON
+        - DAY
+        - UNIT
+        - RESERVATION
+    ExtraTypeSalesType:
+      type: string
+      enum:
+        - INSTANT_CONFIRMATION
+        - BIDDING
+        - ON_REQUEST
+    ExtraTypeCategory:
+      type: string
+      enum:
+        - F_AND_B
+        - F_AND_B_BREAKFAST
+        - F_AND_B_DINNER
+        - EXTENDED_STAY
+        - EXTENDED_STAY_ECI
+        - EXTENDED_STAY_LCO
+        - SPA
+        - ACTIVITIES
+        - TRANSPORTATION
+        - ROOM_AMENITIES
+        - PACKAGES
+        - CLUB_BENEFITS
+        - LOYALTY
+    ExtraTypePointOfSale:
+      type: string
+      enum:
+        - ALL
+        - PRESTAY_ONLY
+        - INHOUSE_ONLY
+    ExtraTypeOfferedDays:
+      type: object
+      properties:
+        mon:
+          type: boolean
+        tue:
+          type: boolean
+        wed:
+          type: boolean
+        thu:
+          type: boolean
+        fri:
+          type: boolean
+        sat:
+          type: boolean
+        sun:
+          type: boolean
+    ExtraTypeOfferedDaysType:
+      type: string
+      enum:
+        - CHECKIN
+        - STAY
+        - CHECKOUT
+    ExtraTypeDayTimeConfirmation:
+      type: string
+      enum:
+        - NOT_REQUIRED
+        - ANY_TIME
+        - SPECIFIC_HOURS
+    ExtraTypeDayTimeConfirmationSchedule:
+      type: object
+      properties:
+        hoursFrom:
+          type: integer
+        hoursTo:
+          type: integer
+        minutesStep:
+          type: integer
+    ExtraTypeVariation:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        hotelId:
+          type: integer
+        status:
+          $ref: "#/components/schemas/ExtraTypeStatus"
+        position:
+          type: integer
+        code:
+          type: string
+        pmsTransactionCode:
+          type: string
+        price:
+          $ref: "#/components/schemas/Money"
+        names:
+          $ref: "#/components/schemas/LocalizedStringsMap"
+    LocalizedStringsMap:
+      type: object
+      additionalProperties:
+        type: string
+      example:
+        en: "Text in English"
+        es: "Texto en español"
+        it: "Testo in italiano"
+        de: "Text auf Deutsch"
+    PictureUrl:
+      type: string
+      format: url
+    ChannelHotelSetup:
+      type: object
+      properties:
+        channelName:
+          type: string
+        channelHotelIdentifier:
+          type: string
+    City:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        country:
+          $ref: "#/components/schemas/Country"
+    Country:
+      type: object
+      properties:
+        id:
+          type: integer
+        isoCode:
+          type: string
+        name:
+          type: string
+    Money:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+      required:
+        - amount
+        - currency
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
