@@ -485,7 +485,7 @@ components:
           type: array
           items:
             format: string
-        allowedMarketSegent:
+        allowedMarketSegment:
           type: array
           items:
             format: string
