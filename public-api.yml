@@ -274,11 +274,18 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
-  /users/{user-id}:
+  /users/{userId}:
     post:
       tags:
         - users
       operationId: updateUser
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: The User ID
+          schema:
+            type: integer
       description: Update an existing user
       requestBody:
         required: true
@@ -307,11 +314,18 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
-  /users/generate_access_token/{user-id}:
+  /users/generate_access_token/{userId}:
     post:
       tags:
         - users
       operationId: generateUserAccessToken
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: The User ID
+          schema:
+            type: integer
       responses:
         '201':
           description: OK
