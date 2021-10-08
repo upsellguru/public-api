@@ -16,6 +16,8 @@ tags:
     description: Upgrade Bids placed on UpsellGuru
   - name: bookedExtras
     description: Booked Extras purchased on UpsellGuru
+  - name: users
+    description: users with access to UpsellGuru Extranet
 
 paths:
   /hotels:
@@ -25,7 +27,7 @@ paths:
       operationId: getHotels
       description: Retrieve list of hotels the API account has access to
       responses:
-        '201':
+        '200':
           description: OK
           content:
             application/json:
@@ -73,7 +75,7 @@ paths:
             format: date
       description: Retrieve list of upgrade bids by hotel Id the API account has access to
       responses:
-        '201':
+        '200':
           description: OK
           content:
             application/json:
@@ -121,7 +123,7 @@ paths:
             format: date
       description: Retrieve list of upgrade bids by hotel Id the API account has access to
       responses:
-        '201':
+        '200':
           description: OK
           content:
             application/json:
@@ -154,7 +156,7 @@ paths:
           schema:
             type: integer
       responses:
-        '201':
+        '200':
           description: OK
           content:
             application/json:
@@ -187,12 +189,150 @@ paths:
           schema:
             type: integer
       responses:
-        '201':
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfExtraType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /users:
+    get:
+      tags:
+        - users
+      operationId: getUsers
+      parameters:
+        - in: query
+          name: hotelId
+          required: false
+          description: The Hotel ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUser'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+    post:
+      tags:
+        - users
+      operationId: createUser
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicUser'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /users/{userId}:
+    post:
+      tags:
+        - users
+      operationId: updateUser
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: The User ID
+          schema:
+            type: integer
+      description: Update an existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicUser'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /users/generate_access_token/{userId}:
+    post:
+      tags:
+        - users
+      operationId: generateUserAccessToken
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: The User ID
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccessToken'
         '400':
           description: Validation Exception
           content:
@@ -640,6 +780,57 @@ components:
           $ref: "#/components/schemas/Money"
         names:
           $ref: "#/components/schemas/LocalizedStringsMap"
+    BasicUser:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/UserStatus"
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+          format: email
+        hotelIds:
+          type: array
+          items:
+            type: integer
+    User:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            lastLoginAt:
+              type: string
+              format: date-time
+        - $ref: "#/components/schemas/BasicUser"
+    UserAccessToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    ArrayOfUser:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    UserStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - DELETED
+        - PENDING
+        - SUSPENDED
+        - CONFIRMED
+        - TEMP_LOCKED
+        - LOCKED
     LocalizedStringsMap:
       type: object
       additionalProperties:
