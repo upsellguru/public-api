@@ -95,6 +95,43 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+  /upgrade_bids/change_status/{upgradeBidId}:
+    post:
+      tags:
+        - upgradeBids
+      operationId: changeUpgradeBidStatus
+      parameters:
+        - in: path
+          name: upgradeBidId
+          required: true
+          description: The Upgrade Bid ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeOfUpgradeBidStatusRequest'
+      description: Change the status of an upgrade bid
+      responses:
+        '204':
+          description: OK
+          content: {}
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /booked_extras:
     get:
       tags:
@@ -472,6 +509,8 @@ components:
           maximum: 4
         reservation:
           $ref: "#/components/schemas/ReservationLite"
+        deniedReason:
+          $ref: "#/components/schemas/UpgradeBidDeniedReason"
     UpgradeBidStatus:
       type: string
       description: This enum describes the possible status an upgrade bid can be in UpsellGuru
@@ -481,6 +520,30 @@ components:
         - EXPIRED
         - PENDING
         - REJECTED
+    ValidNewUpgradeBidStatus:
+      type: string
+      description: This enum describes the possible status an upgrade bid can be submitted to UpsellGuru
+      enum:
+        - ACCEPTED
+        - CANCELLED
+        - REJECTED
+    UpgradeBidDeniedReason:
+      type: string
+      nullable: true
+      description: This enum describes the possible reasons that an upgrade bid can be denied in UpsellGuru
+      enum:
+        - LIMITED_ROOM_TYPE_AVAILABILITY
+        - NO_ROOM_TYPE_AVAILABILITY
+        - OFFER_TOO_WEAK
+        - GUEST_CANT_BE_UPGRADED
+        - PAYMENT_NOT_RECEIVED
+    ChangeOfUpgradeBidStatusRequest:
+      type: object
+      properties:
+        toStatus:
+          $ref: "#/components/schemas/ValidNewUpgradeBidStatus"
+        deniedReason:
+          $ref: "#/components/schemas/UpgradeBidDeniedReason"
     ArrayOfUpgradeBid:
       type: array
       items:
@@ -784,7 +847,7 @@ components:
       type: object
       properties:
         status:
-          $ref: "#/components/schemas/UserStatus"
+          $ref: "#/components/schemas/BasicUserStatus"
         name:
           type: string
         surname:
@@ -798,6 +861,7 @@ components:
             type: integer
     User:
       allOf:
+        - $ref: "#/components/schemas/BasicUser"
         - type: object
           properties:
             id:
@@ -811,7 +875,8 @@ components:
             lastLoginAt:
               type: string
               format: date-time
-        - $ref: "#/components/schemas/BasicUser"
+            status:
+              $ref: "#/components/schemas/UserStatus"
     UserAccessToken:
       type: object
       properties:
@@ -831,6 +896,12 @@ components:
         - CONFIRMED
         - TEMP_LOCKED
         - LOCKED
+    BasicUserStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - SUSPENDED
+        - DELETED
     LocalizedStringsMap:
       type: object
       additionalProperties:
