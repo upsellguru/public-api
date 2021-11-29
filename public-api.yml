@@ -213,6 +213,78 @@ paths:
           content: { }
       security:
         - apiKey: []
+    post:
+      tags:
+        - roomTypes
+      operationId: createRoomType
+      description: Create a new room type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicRoomType'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /room_types/{roomTypeId}:
+    post:
+      tags:
+        - roomTypes
+      operationId: updateRoomTypes
+      parameters:
+        - in: path
+          name: roomTypeId
+          required: true
+          description: The Room Type ID
+          schema:
+            type: integer
+      description: Update an existing room type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicRoomType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /extra_types:
     get:
       tags:
@@ -553,18 +625,46 @@ components:
       items:
         $ref: "#/components/schemas/RoomType"
     RoomType:
+      allOf:
+        - $ref: "#/components/schemas/BasicRoomType"
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            hotelId:
+              type: integer
+            isNotMapped:
+              type: boolean
+              description: If true, this room type was created after receiving a reservation with a room type code not previously mapped
+            hasUpgradePricesConfigured:
+              type: boolean
+            pictures:
+              type: array
+              items:
+                $ref: "#/components/schemas/PictureUrl"
+    RoomTypeLite:
       type: object
       properties:
         id:
           type: integer
-        createdAt:
+        code:
           type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        hotelId:
-          type: integer
+    RoomTypeStatus:
+      type: string
+      description: This enum describes the possible status a room type can be in UpsellGuru
+      enum:
+        - ONLINE
+        - OFFLINE
+        - DELETED
+    BasicRoomType:
+      type: object
+      properties:
         status:
           $ref: "#/components/schemas/RoomTypeStatus"
         code:
@@ -585,30 +685,7 @@ components:
           type: integer
         numberOfRooms:
           type: integer
-          description: Number of phisical room units belonging to this Room Type
-        isNotMapped:
-          type: boolean
-          description: If true, this room type was created after receiving a reservation with a room type code not previously mapped
-        hasUpgradePricesConfigured:
-          type: boolean
-        pictures:
-          type: array
-          items:
-            $ref: "#/components/schemas/PictureUrl"
-    RoomTypeLite:
-      type: object
-      properties:
-        id:
-          type: integer
-        code:
-          type: string
-    RoomTypeStatus:
-      type: string
-      description: This enum describes the possible status a room type can be in UpsellGuru
-      enum:
-        - ONLINE
-        - OFFLINE
-        - DELETED
+          description: Number of physical room units belonging to this Room Type
     ArrayOfExtraType:
       type: array
       items:
