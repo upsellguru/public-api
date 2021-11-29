@@ -318,6 +318,39 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+  /reservations/purchasable_extra_types/{reservationUuid}:
+    get:
+      tags:
+        - reservations
+      operationId: getPurchasableExtraTypes
+      parameters:
+        - in: path
+          name: reservationUuid
+          required: true
+          description: The Reservation UUID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfExtraType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /users:
     get:
       tags:
