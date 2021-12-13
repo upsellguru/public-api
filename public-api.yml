@@ -870,27 +870,27 @@ components:
           type: array
           items:
             format: string
-        excludedMarketSegment:
+        excludedMarketSegments:
           type: array
           items:
             format: string
-        allowedMarketSegment:
+        allowedMarketSegments:
           type: array
           items:
             format: string
-        excludedReservationSource:
+        excludedReservationSources:
           type: array
           items:
             format: string
-        allowedReservationSource:
+        allowedReservationSources:
           type: array
           items:
             format: string
-        excludedMembershipLevel:
+        excludedMembershipLevels:
           type: array
           items:
             format: string
-        allowedMembershipLevel:
+        allowedMembershipLevels:
           type: array
           items:
             format: string
@@ -1017,7 +1017,9 @@ components:
           type: integer
         hoursTo:
           type: integer
-        minutesStep:
+        minutesFrom:
+          type: integer
+        minutesTo:
           type: integer
     ExtraTypeVariation:
       type: object
