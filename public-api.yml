@@ -217,6 +217,13 @@ paths:
       tags:
         - roomTypes
       operationId: createRoomType
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
       description: Create a new room type
       requestBody:
         required: true
@@ -304,6 +311,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrayOfExtraType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+    post:
+      tags:
+        - extraTypes
+      operationId: createExtraType
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+      description: Create a new room type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicExtraType'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtraType'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /extra_types/{extraTypeId}:
+    post:
+      tags:
+        - extraTypes
+      operationId: updateExtraTypes
+      parameters:
+        - in: path
+          name: extraTypeId
+          required: true
+          description: The Extra Type ID
+          schema:
+            type: integer
+      description: Update an existing extra type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicExtraType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtraType'
         '400':
           description: Validation Exception
           content:
@@ -723,19 +809,9 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/ExtraType"
-    ExtraType:
+    BasicExtraType:
       type: object
       properties:
-        id:
-          type: integer
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        hotelId:
-          type: integer
         status:
           $ref: "#/components/schemas/ExtraTypeStatus"
         code:
@@ -794,27 +870,27 @@ components:
           type: array
           items:
             format: string
-        excludedMarketSegment:
+        excludedMarketSegments:
           type: array
           items:
             format: string
-        allowedMarketSegment:
+        allowedMarketSegments:
           type: array
           items:
             format: string
-        excludedReservationSource:
+        excludedReservationSources:
           type: array
           items:
             format: string
-        allowedReservationSource:
+        allowedReservationSources:
           type: array
           items:
             format: string
-        excludedMembershipLevel:
+        excludedMembershipLevels:
           type: array
           items:
             format: string
-        allowedMembershipLevel:
+        allowedMembershipLevels:
           type: array
           items:
             format: string
@@ -830,14 +906,29 @@ components:
           type: string
         isPurchasingMultipleVariationsAllowed:
           type: boolean
-        variations:
-          type: array
-          items:
-            $ref: "#/components/schemas/ExtraTypeVariation"
-        pictures:
-          type: array
-          items:
-            $ref: "#/components/schemas/PictureUrl"
+    ExtraType:
+      allOf:
+        - $ref: "#/components/schemas/BasicExtraType"
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            hotelId:
+              type: integer
+            variations:
+              type: array
+              items:
+                $ref: "#/components/schemas/ExtraTypeVariation"
+            pictures:
+              type: array
+              items:
+                $ref: "#/components/schemas/PictureUrl"
     ExtraTypeLite:
       type: object
       properties:
@@ -926,7 +1017,9 @@ components:
           type: integer
         hoursTo:
           type: integer
-        minutesStep:
+        minutesFrom:
+          type: integer
+        minutesTo:
           type: integer
     ExtraTypeVariation:
       type: object
