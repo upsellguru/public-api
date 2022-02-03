@@ -233,7 +233,7 @@ paths:
               $ref: '#/components/schemas/BasicRoomType'
       responses:
         '201':
-          description: Created
+          description: OK
           content:
             application/json:
               schema:
@@ -345,7 +345,7 @@ paths:
               $ref: '#/components/schemas/BasicExtraType'
       responses:
         '201':
-          description: Created
+          description: OK
           content:
             application/json:
               schema:
@@ -404,11 +404,71 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
-  /reservations/purchasable_extra_types/{reservationUuid}:
-    get:
+  /reservations:
+    post:
       tags:
         - reservations
-      operationId: getPurchasableExtraTypes
+      operationId: saveReservation
+      description: Create or update reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicReservation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSaved'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /reservations/create_upsell/{reservationUuid}:
+    post:
+      tags:
+        - reservations
+      operationId: createReservationUpsell
+      description: Create a reservation upsell
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationUpsellUrls'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /reservations/add_event/{reservationUuid}:
+    post:
+      tags:
+        - reservations
+      operationId: addReservationEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewReservationEventRequest'
       parameters:
         - in: path
           name: reservationUuid
@@ -416,6 +476,33 @@ paths:
           description: The Reservation UUID
           schema:
             type: string
+            format: uuid
+      description: Add a new event to a reservation
+      responses:
+        '204':
+          description: OK
+          content: {}
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /reservations/purchasable_extra_types/{reservationUuid}:
+    get:
+      tags:
+        - reservations
+      operationId: getReservationPurchasableExtraTypes
+      parameters:
+        - in: path
+          name: reservationUuid
+          required: true
+          description: The Reservation UUID
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: OK
@@ -483,7 +570,7 @@ paths:
               $ref: '#/components/schemas/BasicUser'
       responses:
         '201':
-          description: Created
+          description: OK
           content:
             application/json:
               schema:
@@ -614,7 +701,7 @@ components:
         languages:
           type: array
           items:
-            format: string
+            $ref: "#/components/schemas/LanguageCode"
     HotelStatus:
       type: string
       description: Hotel status
@@ -622,11 +709,22 @@ components:
         - ONLINE
         - OFFLINE
         - ONBOARDING
+    ReservationStatus:
+      type: string
+      description: This enum describes all possible status a reservation can be in UpsellGuru
+      enum:
+        - TENTATIVE
+        - CONFIRMED
+        - INHOUSE
+        - CHECKEDOUT
+        - CANCELLED
+        - NOSHOW
     ReservationLite:
       type: object
       properties:
-        id:
-          type: integer
+        uuid:
+          type: string
+          format: uuid
         checkin:
           type: string
           format: date
@@ -641,6 +739,177 @@ components:
           type: string
         reservationSource:
           type: string
+    BasicReservation:
+      type: object
+      properties:
+        hotelId:
+          type: integer
+        checkin:
+          type: string
+          format: date
+        checkout:
+          type: string
+          format: date
+        reference:
+          type: string
+          description: Reservation identifier in the PMS or other systems acting as source of truth.
+        status:
+          $ref: "#/components/schemas/ReservationStatus"
+        roomTypeCode:
+          type: string
+        guestName:
+          type: string
+        guestSurname:
+          type: string
+        email:
+          type: string
+        adults:
+          type: integer
+        children:
+          type: integer
+        language:
+          $ref: "#/components/schemas/LanguageCode"
+        ratePlan:
+          type: string
+        marketSegment:
+          type: string
+        reservationSource:
+          type: string
+        includedExtraCodes:
+          type: array
+          description: List of string codes e.g. BRKF, EARLY, LATE etc or their numeric identifiers
+          items:
+            type: string
+      required:
+        - hotelId
+        - checkin
+        - checkout
+        - reference
+        - status
+        - roomTypeCode
+        - adults
+        - language
+    Reservation:
+      allOf:
+        - $ref: "#/components/schemas/BasicReservation"
+        - type: object
+          properties:
+            uuid:
+              type: string
+              description: Reservation identifier generated by UpsellGuru
+          required:
+            - uuid
+    ReservationSaved:
+      type: object
+      properties:
+        reservationUuid:
+          type: string
+          format: uuid
+    ReservationUpsellUrls:
+      type: object
+      properties:
+        url:
+          type: string
+          format: url
+        roomsUrl:
+          type: string
+          format: url
+        extrasUrl:
+          type: string
+          format: url
+    NewReservationEventRequest:
+      type: object
+      properties:
+        eventType:
+          $ref: "#/components/schemas/ReservationEventTypeEnum"
+    ReservationEventTypeEnum:
+      type: string
+      enum:
+        - DATES_CHANGED
+        - PRE_ARRIVAL_UPSELLING_EMAIL_SENT
+        - PRE_ARRIVAL_UPSELLING_EMAIL_BOUNCED
+        - PRE_ARRIVAL_UPSELLING_EMAIL_SPAM
+        - PRE_ARRIVAL_UPSELLING_EMAIL_DELIVERED
+        - PRE_ARRIVAL_UPSELLING_EMAIL_OPENED
+        - PRE_ARRIVAL_UPSELLING_EMAIL_CLICKED
+        - PRE_ARRIVAL_CONCIERGE_SENT
+        - PRE_ARRIVAL_CONCIERGE_OPENED
+        - PRE_ARRIVAL_CONCIERGE_CLICKED
+        - REGISTRATION_CARD_SENT
+        - REGISTRATION_CARD_OPENED
+        - REGISTRATION_CARD_CLICKED
+        - REGISTRATION_CARD_SUBMITTED
+        - REGISTRATION_CARD_REMINDER_SENT
+        - REGISTRATION_CARD_REMINDER_OPENED
+        - REGISTRATION_CARD_REMINDER_CLICKED
+        - ROOM_CHANGED_IN_PMS
+        - BOOKED_EXTRA_CONFIRMATION_CLICKED_RETARGETING
+        - UPGRADE_BID_ACCEPTED_CLICKED_RETARGETING
+        - UPGRADE_BID_DENIED_CLICKED_RETARGETING
+        - UPGRADE_BIDS_CONFIRMATION_CLICKED_RETARGETING
+        - PRE_ARRIVAL_UPSELLING_SMS_CLICKED
+        - PRE_ARRIVAL_UPSELLING_SMS_DELIVERED
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_SENT
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_DELIVERED
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_BOUNCED
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_OPENED
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_SPAM
+        - PRE_ARRIVAL_UPSELLING_REMINDER_EMAIL_CLICKED
+        - ROOM_UPGRADE_ALTERNATIVE_UPGRADE_CREATED
+        - ROOM_UPGRADE_ALTERNATIVE_UPGRADE_EMAIL_OPENED
+        - ROOM_UPGRADE_ALTERNATIVE_UPGRADE_EMAIL_CLICKED
+        - ROOM_UPGRADE_ALTERNATIVE_UPGRADE_ACCEPTED
+        - ROOM_UPGRADE_ALTERNATIVE_UPGRADE_REJECTED
+        - CHECKED_IN
+        - CANCELLED
+        - NO_SHOW
+        - INHOUSE_EXTRAS_SELECTED
+        - FIRST_INHOUSE_EMAIL_SENT
+        - FIRST_INHOUSE_EMAIL_DELIVERED
+        - FIRST_INHOUSE_EMAIL_OPENED
+        - FIRST_INHOUSE_EMAIL_CLICKED
+        - SECOND_INHOUSE_EMAIL_SENT
+        - SECOND_INHOUSE_EMAIL_DELIVERED
+        - SECOND_INHOUSE_EMAIL_OPENED
+        - SECOND_INHOUSE_EMAIL_CLICKED
+        - THIRD_INHOUSE_EMAIL_SENT
+        - THIRD_INHOUSE_EMAIL_DELIVERED
+        - THIRD_INHOUSE_EMAIL_OPENED
+        - THIRD_INHOUSE_EMAIL_CLICKED
+        - FIRST_INHOUSE_SMS_DELIVERED
+        - FIRST_INHOUSE_SMS_CLICKED
+        - SECOND_INHOUSE_SMS_DELIVERED
+        - SECOND_INHOUSE_SMS_CLICKED
+        - THIRD_INHOUSE_SMS_DELIVERED
+        - THIRD_INHOUSE_SMS_CLICKED
+        - FIRST_INHOUSE_SMS_SENT
+        - SECOND_INHOUSE_SMS_SENT
+        - THIRD_INHOUSE_SMS_SENT
+        - RESERVATION_CANCELLATION_SENT
+        - RESERVATION_CANCELLATION_OPENED
+        - RESERVATION_CANCELLATION_CLICKED
+        - CHECKED_OUT
+        - UNSUBSCRIBED
+        - CHATBOT_CLICK
+        - PMS_UPDATE
+        - ROOM_UPGRADES_STARTED_BIDDING
+        - ROOM_UPGRADES_SKIP
+        - ROOM_UPGRADES_NO_BIDS
+        - ROOM_UPGRADES_WITH_BIDS
+        - ROOM_UPGRADE_BIDS_EXPIRED
+        - PRE_ARRIVAL_UPSELLING_EXTRAS_SELECTED
+        - PRE_ARRIVAL_UPSELLING_EXTRAS_EMPTY
+        - PRE_ARRIVAL_UPSELLING_EXTRAS_ADDED
+        - PRE_ARRIVAL_UPSELLING_TRANSACTION
+        - ROOM_UPGRADE_BID_ACCEPTED
+        - ROOM_UPGRADE_BID_REJECTED
+        - ON_REQUEST_EXTRA_CONFIRMED
+        - ROOM_UPGRADE_BID_SYSTEM_ACCEPTED
+        - ROOM_UPGRADE_BID_SYSTEM_REJECTED
+        - ROOM_UPGRADE_CANCELLED
+        - POSTSTAY_SENT
+        - POSTSTAY_OPENED
+        - POSTSTAY_CLICKED
     BookedExtra:
       type: object
       properties:
@@ -664,7 +933,7 @@ components:
           $ref: "#/components/schemas/ReservationLite"
     BookedExtraStatus:
       type: string
-      description: This enum describes the possible status a booked extra can be in UpsellGuru
+      description: This enum describes all possible status a booked extra can be in UpsellGuru
       enum:
         - CONFIRMED
         - REJECTED
@@ -704,7 +973,7 @@ components:
           $ref: "#/components/schemas/UpgradeBidDeniedReason"
     UpgradeBidStatus:
       type: string
-      description: This enum describes the possible status an upgrade bid can be in UpsellGuru
+      description: This enum describes all possible status an upgrade bid can be in UpsellGuru
       enum:
         - ACCEPTED
         - CANCELLED
@@ -713,7 +982,7 @@ components:
         - REJECTED
     ValidNewUpgradeBidStatus:
       type: string
-      description: This enum describes the possible status an upgrade bid can be submitted to UpsellGuru
+      description: This enum describes all possible status an upgrade bid can be submitted to UpsellGuru
       enum:
         - ACCEPTED
         - CANCELLED
@@ -721,7 +990,7 @@ components:
     UpgradeBidDeniedReason:
       type: string
       nullable: true
-      description: This enum describes the possible reasons that an upgrade bid can be denied in UpsellGuru
+      description: This enum describes all possible reasons that an upgrade bid can be denied in UpsellGuru
       enum:
         - LIMITED_ROOM_TYPE_AVAILABILITY
         - NO_ROOM_TYPE_AVAILABILITY
@@ -776,7 +1045,7 @@ components:
           type: string
     RoomTypeStatus:
       type: string
-      description: This enum describes the possible status a room type can be in UpsellGuru
+      description: This enum describes all possible status a room type can be in UpsellGuru
       enum:
         - ONLINE
         - OFFLINE
@@ -940,7 +1209,7 @@ components:
           $ref: "#/components/schemas/ExtraTypeCategory"
     ExtraTypeStatus:
       type: string
-      description: This enum describes the possible status an extra type can be in UpsellGuru
+      description: This enum describes all possible status an extra type can be in UpsellGuru
       enum:
         - ONLINE
         - OFFLINE
@@ -1153,6 +1422,26 @@ components:
       required:
         - amount
         - currency
+    LanguageCode:
+      type: string
+      enum:
+        - EN
+        - ES
+        - IT
+        - FR
+        - PT
+        - DE
+        - GE
+        - JP
+        - CN
+        - RU
+        - NL
+        - TR
+        - PL
+        - ID
+        - BG
+        - CZ
+        - ZH
   securitySchemes:
     apiKey:
       type: apiKey
