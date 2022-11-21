@@ -18,6 +18,8 @@ tags:
     description: Booked Extras purchased on UpsellGuru
   - name: users
     description: users with access to UpsellGuru Extranet
+  - name: availability
+    description: Room Type availability
 
 paths:
   /hotels:
@@ -662,6 +664,36 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+  /availability:
+    post:
+      tags:
+        - availability
+      operationId: pushAvailability
+      description: Create or update room type availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelAvailability'
+      responses:
+        '204':
+          description: OK
+          content: { }
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
 components:
   schemas:
     Error:
@@ -780,6 +812,8 @@ components:
           description: List of string codes e.g. BRKF, EARLY, LATE etc or their numeric identifiers
           items:
             type: string
+        metadata:
+          type: array
       required:
         - hotelId
         - checkin
@@ -1315,6 +1349,29 @@ components:
           $ref: "#/components/schemas/Money"
         names:
           $ref: "#/components/schemas/LocalizedStringsMap"
+    HotelAvailability:
+      type: object
+      properties:
+        hotelId:
+          type: integer
+        availability:
+          $ref: "#/components/schemas/ArrayOfRoomTypeAvailability"
+    ArrayOfRoomTypeAvailability:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoomTypeAvailability"
+    RoomTypeAvailability:
+      type: object
+      properties:
+        roomTypeCode:
+          type: string
+        date:
+          type: string
+          format: date
+        available:
+          type: integer
+        booked:
+          type: integer
     BasicUser:
       type: object
       properties:
