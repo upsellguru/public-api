@@ -813,7 +813,8 @@ components:
           items:
             type: string
         metadata:
-          type: array
+          type: object
+          additionalProperties: true
       required:
         - hotelId
         - checkin
