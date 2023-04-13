@@ -134,6 +134,54 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+  /room_upgrades:
+    get:
+      tags:
+        - roomUpgrades
+      operationId: getRoomUpgradesList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+        - in: query
+          name: dateFrom
+          required: true
+          description: Transaction date from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          required: true
+          description: Transaction date to
+          schema:
+            type: string
+            format: date
+      description: Retrieve list of room upgrades by hotel Id the API account has access to
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoomUpgrade'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /booked_extras:
     get:
       tags:
@@ -167,7 +215,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfUpgradeBid'
+                $ref: '#/components/schemas/ArrayOfBookedExtra'
         '400':
           description: Validation Exception
           content:
@@ -741,6 +789,21 @@ components:
         - ONLINE
         - OFFLINE
         - ONBOARDING
+    Touchpoint:
+      type: string
+      description: This enum describes all possible touchpoint where something can be purchased on UpsellGuru
+      enum:
+        - AT_RESERVATION
+        - RESERVATION_CONFIRMATION
+        - PRE_ARRIVAL_UPSELLING
+        - PRE_ARRIVAL_UPSELLING_REMINDER
+        - ALTERNATIVE_UPGRADE
+        - REGISTRATION_CARD
+        - FRONT_DESK
+        - SPA
+        - F_AND_B
+        - INHOUSE_EXTRAS
+        - HOTEL_DIRECTORY
     ReservationStatus:
       type: string
       description: This enum describes all possible status a reservation can be in UpsellGuru
@@ -956,6 +1019,8 @@ components:
         updatedAt:
           type: string
           format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
         status:
           $ref: "#/components/schemas/BookedExtraStatus"
         extraType:
@@ -990,6 +1055,8 @@ components:
         updatedAt:
           type: string
           format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
         status:
           $ref: "#/components/schemas/UpgradeBidStatus"
         fromRoomType:
@@ -1043,6 +1110,41 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/UpgradeBid"
+    ArrayOfRoomUpgrade:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoomUpgrade"
+    RoomUpgrade:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
+        status:
+          $ref: "#/components/schemas/RoomUpgradeStatus"
+        fromRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        toRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        amount:
+          $ref: "#/components/schemas/Money"
+        reservation:
+          $ref: "#/components/schemas/ReservationLite"
+    RoomUpgradeStatus:
+      type: string
+      description: This enum describes all possible status a room upgrade can be in UpsellGuru
+      enum:
+        - CONFIRMED
+        - PENDING
+        - CANCELLED
+        - REPLACED
     ArrayOfRoomType:
       type: array
       items:
