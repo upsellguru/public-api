@@ -160,14 +160,14 @@ paths:
           schema:
             type: string
             format: date
-      description: Retrieve list of upgrade bids by hotel Id the API account has access to
+      description: Retrieve list of booked extras by hotel Id the API account has access to
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfUpgradeBid'
+                $ref: '#/components/schemas/ArrayOfBookedExtra'
         '400':
           description: Validation Exception
           content:
