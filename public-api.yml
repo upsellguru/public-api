@@ -439,6 +439,87 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+    get:
+      tags:
+        - reservations
+      operationId: getReservationsList
+      description: Retrieve list of reservations stored in UpsellGuru by hotel Id the API account has access to
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+        - in: query
+          name: checkinDate
+          required: false
+          description: The Checkin Date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: checkoutDate
+          required: false
+          description: The Checkout Date
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfReservation'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
+  /reservations/{reservationUuid}:
+    get:
+      tags:
+        - reservations
+      operationId: getReservation
+      description: Retrieve a specific reservation stored in UpsellGuru
+      parameters:
+        - in: path
+          name: reservationUuid
+          required: true
+          description: The Reservation Identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /reservations/create_upsell/{reservationUuid}:
     post:
       tags:
@@ -741,6 +822,10 @@ components:
         - ONLINE
         - OFFLINE
         - ONBOARDING
+    ArrayOfReservation:
+      type: array
+      items:
+        $ref: "#/components/schemas/ReservationLite"
     ReservationStatus:
       type: string
       description: This enum describes all possible status a reservation can be in UpsellGuru
@@ -757,6 +842,12 @@ components:
         uuid:
           type: string
           format: uuid
+        status:
+          $ref: "#/components/schemas/ReservationStatus"
+        roomTypeCode:
+          type: string
+        bookedRoomTypeCode:
+          type: string
         checkin:
           type: string
           format: date
