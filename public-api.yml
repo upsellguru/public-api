@@ -1200,6 +1200,9 @@ components:
         numberOfRooms:
           type: integer
           description: Number of physical room units belonging to this Room Type
+        categoryId:
+          type: integer
+          description: Room Type category id that the room type belongs to
     ArrayOfExtraType:
       type: array
       items:
