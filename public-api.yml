@@ -1687,7 +1687,6 @@ components:
         -QR_CODE
         -AT_DESK
         -PHONE
-
   securitySchemes:
     apiKey:
       type: apiKey
