@@ -1631,6 +1631,13 @@ components:
         - ZH
     SaveBookedExtraRequest:
       type: object
+      required:
+        - hotelId
+        - reservationId
+        - extraTypeId
+        - variations
+        - touchpoint
+        - sourceChannel
       properties:
         hotelId:
           type: integer
