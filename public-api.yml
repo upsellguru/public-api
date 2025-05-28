@@ -182,6 +182,41 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+    post:
+      tags:
+        - bookedExtras
+      operationId: saveBookedExtra
+      description: Create a new booked extra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveBookedExtraRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookedExtra:
+                    $ref: '#/components/schemas/BookedExtra'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /room_types:
     get:
       tags:
@@ -1594,6 +1629,98 @@ components:
         - BG
         - CZ
         - ZH
+    SaveBookedExtraRequest:
+      type: object
+      required:
+        - hotelId
+        - reservationId
+        - extraTypeId
+        - touchpoint
+        - sourceChannel
+        - price
+        - quantity
+      properties:
+        hotelId:
+          type: integer
+          description: The Hotel ID
+        reservationId:
+          type: integer
+          description: The Reservation ID
+        extraTypeId:
+          type: integer
+          description: The Extra Type ID
+        variationId:
+          type: integer
+          description: The Extra Type variation ID
+        quantity:
+          type: integer
+          description: Quantity of the extra being booked
+        price:
+          type: number
+          format: float
+          description: Price per unit
+        dynamicPricing:
+          type: object
+          description: Map of variations with their quantities and prices
+          required:
+            - range
+            - roomTypePrice
+            - limit
+          properties:
+            limit:
+              type: string
+              description: End date for the dynamic pricing
+            range:
+              type: object
+              description: Quantity of the extra being booked
+              properties:
+                fromHour:
+                  type: integer
+                  description: Start time (in hours) for applying dynamic pricing rules
+                toHour:
+                  type: integer
+                  description: End time (in hours) for applying dynamic pricing rules
+                roomRatePercentage:
+                  type: integer
+                  description: Room rate percentage used for dynamic pricing
+            roomTypePrice:
+              type: object
+              description: Dynamic pricing details (required only for dynamic pricing model)
+              properties:
+                amount:
+                  type: number
+                  format: float
+                  description: Price
+                currency:
+                  type: string
+                  description: Currency
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
+        sourceChannel:
+          $ref: "#/components/schemas/SourceChannel"
+    Touchpoint:
+      type: string
+      enum:
+        -AT_RESERVATION
+        -RESERVATION_CONFIRMATION
+        -PRE_ARRIVAL_UPSELLING
+        -PRE_ARRIVAL_UPSELLING_REMINDER
+        -ALTERNATIVE_UPGRADE
+        -REGISTRATION_CARD
+        -FRONT_DESK
+        -SPA
+        -F_AND_B
+        -INHOUSE_EXTRAS
+        -HOTEL_DIRECTORY
+    SourceChannel:
+      type: string
+      enum:
+        -EMAIL
+        -SMS
+        -WHATSAPP
+        -QR_CODE
+        -AT_DESK
+        -PHONE
   securitySchemes:
     apiKey:
       type: apiKey
