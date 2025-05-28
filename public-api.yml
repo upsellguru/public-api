@@ -1635,9 +1635,10 @@ components:
         - hotelId
         - reservationId
         - extraTypeId
-        - variations
         - touchpoint
         - sourceChannel
+        - price
+        - quantity
       properties:
         hotelId:
           type: integer
@@ -1648,25 +1649,51 @@ components:
         extraTypeId:
           type: integer
           description: The Extra Type ID
-        variations:
+        variationId:
+          type: integer
+          description: The Extra Type variation ID
+        quantity:
+          type: integer
+          description: Quantity of the extra being booked
+        price:
+          type: number
+          format: float
+          description: Price per unit
+        dynamicPricing:
           type: object
           description: Map of variations with their quantities and prices
-          additionalProperties:
-            type: object
-            required:
-              - quantity
-              - price
-            properties:
-              quantity:
-                type: integer
-                description: Quantity of the extra being booked
-              price:
-                type: number
-                format: float
-                description: Price per unit
-              dynamicPrice:
-                type: object
-                description: Dynamic pricing details (required only for dynamic pricing model)
+          required:
+            - range
+            - roomTypePrice
+            - limit
+          properties:
+            limit:
+              type: string
+              description: End date for the dynamic pricing
+            range:
+              type: object
+              description: Quantity of the extra being booked
+              properties:
+                fromHour:
+                  type: integer
+                  description: Start time (in hours) for applying dynamic pricing rules
+                toHour:
+                  type: integer
+                  description: End time (in hours) for applying dynamic pricing rules
+                roomRatePercentage:
+                  type: integer
+                  description: Room rate percentage used for dynamic pricing
+            roomTypePrice:
+              type: object
+              description: Dynamic pricing details (required only for dynamic pricing model)
+              properties:
+                amount:
+                  type: number
+                  format: float
+                  description: Price
+                currency:
+                  type: string
+                  description: Currency
         touchpoint:
           $ref: "#/components/schemas/Touchpoint"
         sourceChannel:
