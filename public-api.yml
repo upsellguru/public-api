@@ -97,6 +97,41 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+    post:
+      tags:
+        - upgradeBids
+      operationId: saveUpgradeBid
+      description: Create a new Upgrade Bid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveUpgradeBidRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upgradeBid:
+                    $ref: '#/components/schemas/UpgradeBid'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /upgrade_bids/change_status/{upgradeBidId}:
     post:
       tags:
@@ -1694,6 +1729,36 @@ components:
                 currency:
                   type: string
                   description: Currency
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
+        sourceChannel:
+          $ref: "#/components/schemas/SourceChannel"
+    SaveUpgradeBidRequest:
+      type: object
+      required:
+        - hotelId
+        - reservationId
+        - roomTypeId
+        - amount
+        - touchpoint
+        - sourceChannel
+      properties:
+        hotelId:
+          type: integer
+          description: The Hotel ID
+        reservationId:
+          type: integer
+          description: The Reservation ID
+        roomTypeId:
+          type: integer
+          description: The Room Type ID
+        wasHighlightedRoom:
+          type: boolean
+          description: Room type was previously highlighted
+        amount:
+          type: number
+          format: float
+          description: Amount of the upgrade bid
         touchpoint:
           $ref: "#/components/schemas/Touchpoint"
         sourceChannel:
