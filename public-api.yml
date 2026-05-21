@@ -14,6 +14,8 @@ tags:
     description: Extra Types configured in UpsellGuru
   - name: upgradeBids
     description: Upgrade Bids placed on UpsellGuru
+  - name: roomUpgrades
+    description: Confirmed Room Upgrades sold on UpsellGuru
   - name: bookedExtras
     description: Booked Extras purchased on UpsellGuru
   - name: users
@@ -64,17 +66,23 @@ paths:
         - in: query
           name: dateFrom
           required: true
-          description: Transaction date from
+          description: Start of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
           schema:
             type: string
             format: date
         - in: query
           name: dateTo
           required: true
-          description: Transaction date to
+          description: End of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
           schema:
             type: string
             format: date
+        - in: query
+          name: dateType
+          required: false
+          description: Selects which date field the `dateFrom`/`dateTo` range is applied to. When omitted, the legacy default filter is used.
+          schema:
+            $ref: '#/components/schemas/DateType'
       description: Retrieve list of upgrade bids by hotel Id the API account has access to
       responses:
         '200':
@@ -169,6 +177,60 @@ paths:
           content: { }
       security:
         - apiKey: [ ]
+  /room_upgrades:
+    get:
+      tags:
+        - roomUpgrades
+      operationId: getRoomUpgradesList
+      parameters:
+        - in: query
+          name: hotelId
+          required: true
+          description: The Hotel ID
+          schema:
+            type: integer
+        - in: query
+          name: dateFrom
+          required: true
+          description: Start of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          required: true
+          description: End of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateType
+          required: false
+          description: Selects which date field the `dateFrom`/`dateTo` range is applied to. When omitted, the legacy default filter is used.
+          schema:
+            $ref: '#/components/schemas/DateType'
+      description: Retrieve list of confirmed room upgrades by hotel Id the API account has access to
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoomUpgrade'
+        '400':
+          description: Validation Exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Security Exception
+          content: { }
+        '403':
+          description: Security Exception
+          content: { }
+      security:
+        - apiKey: [ ]
   /booked_extras:
     get:
       tags:
@@ -184,17 +246,23 @@ paths:
         - in: query
           name: dateFrom
           required: true
-          description: Transaction date from
+          description: Start of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
           schema:
             type: string
             format: date
         - in: query
           name: dateTo
           required: true
-          description: Transaction date to
+          description: End of the date range to filter by (inclusive). The field filtered on is determined by `dateType`.
           schema:
             type: string
             format: date
+        - in: query
+          name: dateType
+          required: false
+          description: Selects which date field the `dateFrom`/`dateTo` range is applied to. When omitted, the legacy default filter is used.
+          schema:
+            $ref: '#/components/schemas/DateType'
       description: Retrieve list of booked extras by hotel Id the API account has access to
       responses:
         '200':
@@ -1117,6 +1185,8 @@ components:
         updatedAt:
           type: string
           format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
         status:
           $ref: "#/components/schemas/BookedExtraStatus"
         extraType:
@@ -1151,6 +1221,8 @@ components:
         updatedAt:
           type: string
           format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
         status:
           $ref: "#/components/schemas/UpgradeBidStatus"
         fromRoomType:
@@ -1204,6 +1276,86 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/UpgradeBid"
+    RoomUpgrade:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
+        status:
+          $ref: "#/components/schemas/RoomUpgradeStatus"
+        user:
+          nullable: true
+          type: object
+          properties:
+            id:
+              type: integer
+            fullName:
+              type: string
+        fromRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        toRoomType:
+          $ref: "#/components/schemas/RoomTypeLite"
+        amount:
+          $ref: "#/components/schemas/Money"
+        reconciliation:
+          type: object
+          properties:
+            lastUpdate:
+              type: string
+              format: date-time
+              nullable: true
+            status:
+              type: string
+              nullable: true
+            errors:
+              nullable: true
+            metadata:
+              nullable: true
+            user:
+              nullable: true
+              type: object
+              properties:
+                id:
+                  type: integer
+                fullName:
+                  type: string
+        reservation:
+          $ref: "#/components/schemas/ReservationLite"
+    RoomUpgradeStatus:
+      type: string
+      description: This enum describes all possible status a room upgrade can be in UpsellGuru
+      enum:
+        - CONFIRMED
+        - PENDING
+        - CANCELLED
+        - REPLACED
+    ArrayOfRoomUpgrade:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoomUpgrade"
+    DateType:
+      type: string
+      description: |
+        Selects which date field a date-range filter applies to.
+        - `CHECKIN`: reservation check-in date
+        - `STAY`: any night within the reservation stay
+        - `CHECKOUT`: reservation check-out date
+        - `ACTIVITY`: last activity (updated at) timestamp
+        - `TRANSACTION`: transaction date
+      enum:
+        - CHECKIN
+        - STAY
+        - CHECKOUT
+        - ACTIVITY
+        - TRANSACTION
     ArrayOfRoomType:
       type: array
       items:
@@ -1766,26 +1918,27 @@ components:
     Touchpoint:
       type: string
       enum:
-        -AT_RESERVATION
-        -RESERVATION_CONFIRMATION
-        -PRE_ARRIVAL_UPSELLING
-        -PRE_ARRIVAL_UPSELLING_REMINDER
-        -ALTERNATIVE_UPGRADE
-        -REGISTRATION_CARD
-        -FRONT_DESK
-        -SPA
-        -F_AND_B
-        -INHOUSE_EXTRAS
-        -HOTEL_DIRECTORY
+        - AT_RESERVATION
+        - RESERVATION_CONFIRMATION
+        - PRE_ARRIVAL_UPSELLING
+        - PRE_ARRIVAL_UPSELLING_REMINDER
+        - ALTERNATIVE_UPGRADE
+        - GUEST_RETARGETING
+        - REGISTRATION_CARD
+        - FRONT_DESK
+        - SPA
+        - F_AND_B
+        - INHOUSE_EXTRAS
+        - HOTEL_DIRECTORY
     SourceChannel:
       type: string
       enum:
-        -EMAIL
-        -SMS
-        -WHATSAPP
-        -QR_CODE
-        -AT_DESK
-        -PHONE
+        - EMAIL
+        - SMS
+        - WHATSAPP
+        - QR_CODE
+        - AT_DESK
+        - PHONE
   securitySchemes:
     apiKey:
       type: apiKey
