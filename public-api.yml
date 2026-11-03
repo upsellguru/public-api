@@ -1021,9 +1021,7 @@ components:
           format: date
         reference:
           type: string
-          description: >-
-            Reservation identifier in the PMS or other systems acting as source of truth. Can be used to
-            look up a reservation with `GET /reservations`.
+          description: Reservation identifier in the PMS or other systems acting as source of truth. Can be used to look up a reservation with `GET /reservations`.
         status:
           $ref: "#/components/schemas/ReservationStatus"
         roomTypeCode:
