@@ -583,17 +583,7 @@ paths:
       tags:
         - reservations
       operationId: getReservationsList
-      description: |
-        Retrieve list of reservations stored in UpsellGuru by hotel Id the API account has access to.
-
-        One of `checkinDate`, `checkoutDate` or `reference` is required.
-
-        To look up a single reservation, send `hotelId` and `reference`. The response contains the matching
-        reservation, or an empty array when nothing matches.
-
-        `reference` is the reservation identifier in the PMS. For PMSs that create one UpsellGuru reservation
-        per room, it combines several PMS identifiers separated by `:` (for example `12345:2`), so send the
-        full value exactly as this API returns it in `reference`.
+      description: Retrieve list of reservations stored in UpsellGuru by hotel Id the API account has access to. One of `checkinDate`, `checkoutDate` or `reference` is required. To look up a single reservation, send `hotelId` and `reference`. The response contains the matching reservation, or an empty array when nothing matches. `reference` is the reservation identifier in the PMS. For PMSs that create one UpsellGuru reservation per room, it combines several PMS identifiers separated by `:` (for example `12345:2`), so send the full value exactly as this API returns it in `reference`.
       parameters:
         - in: query
           name: hotelId
@@ -618,9 +608,7 @@ paths:
         - in: query
           name: reference
           required: false
-          description: >-
-            Reservation identifier in the PMS, exactly as returned in `reference`. When sent, `checkinDate`
-            and `checkoutDate` are ignored. Returns the matching reservation, or an empty array.
+          description: Reservation identifier in the PMS, exactly as returned in `reference`. When sent, `checkinDate` and `checkoutDate` are ignored. Returns the matching reservation, or an empty array.
           schema:
             type: string
       responses:
