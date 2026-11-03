@@ -16,6 +16,8 @@ tags:
     description: Upgrade Bids placed on UpsellGuru
   - name: roomUpgrades
     description: Confirmed Room Upgrades sold on UpsellGuru
+  - name: reservations
+    description: Reservations stored in UpsellGuru
   - name: bookedExtras
     description: Booked Extras purchased on UpsellGuru
   - name: users
@@ -581,7 +583,17 @@ paths:
       tags:
         - reservations
       operationId: getReservationsList
-      description: Retrieve list of reservations stored in UpsellGuru by hotel Id the API account has access to
+      description: |
+        Retrieve list of reservations stored in UpsellGuru by hotel Id the API account has access to.
+
+        One of `checkinDate`, `checkoutDate` or `reference` is required.
+
+        To look up a single reservation, send `hotelId` and `reference`. The response contains the matching
+        reservation, or an empty array when nothing matches.
+
+        `reference` is the reservation identifier in the PMS. For PMSs that create one UpsellGuru reservation
+        per room, it combines several PMS identifiers separated by `:` (for example `12345:2`), so send the
+        full value exactly as this API returns it in `reference`.
       parameters:
         - in: query
           name: hotelId
@@ -592,17 +604,25 @@ paths:
         - in: query
           name: checkinDate
           required: false
-          description: The Checkin Date
+          description: The Checkin Date. Ignored when `reference` is sent.
           schema:
             type: string
             format: date
         - in: query
           name: checkoutDate
           required: false
-          description: The Checkout Date
+          description: The Checkout Date. Ignored when `reference` is sent.
           schema:
             type: string
             format: date
+        - in: query
+          name: reference
+          required: false
+          description: >-
+            Reservation identifier in the PMS, exactly as returned in `reference`. When sent, `checkinDate`
+            and `checkoutDate` are ignored. Returns the matching reservation, or an empty array.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1013,7 +1033,9 @@ components:
           format: date
         reference:
           type: string
-          description: Reservation identifier in the PMS or other systems acting as source of truth.
+          description: >-
+            Reservation identifier in the PMS or other systems acting as source of truth. Can be used to
+            look up a reservation with `GET /reservations`.
         status:
           $ref: "#/components/schemas/ReservationStatus"
         roomTypeCode:
