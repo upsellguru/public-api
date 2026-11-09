@@ -1601,25 +1601,60 @@ components:
         updatedAt:
           type: string
           format: date-time
-        touchpoint:
-          $ref: "#/components/schemas/Touchpoint"
         status:
           $ref: "#/components/schemas/BookedExtraStatus"
+        touchpoint:
+          $ref: "#/components/schemas/Touchpoint"
+        sourceChannel:
+          $ref: "#/components/schemas/SourceChannel"
+        user:
+          nullable: true
+          type: object
+          properties:
+            id:
+              type: integer
+            fullName:
+              type: string
         extraType:
           $ref: "#/components/schemas/ExtraTypeLite"
         amount:
           $ref: "#/components/schemas/Money"
+        reconciliation:
+          type: object
+          properties:
+            lastUpdate:
+              type: string
+              format: date-time
+              nullable: true
+            status:
+              type: string
+              nullable: true
+            errors:
+              nullable: true
+            metadata:
+              nullable: true
+            user:
+              nullable: true
+              type: object
+              properties:
+                id:
+                  type: integer
+                fullName:
+                  type: string
         quantity:
           type: integer
         reservation:
           $ref: "#/components/schemas/ReservationLite"
     BookedExtraStatus:
       type: string
-      description: This enum describes all possible status a booked extra can be in UpsellGuru
+      description: |
+        This enum describes all possible status a booked extra can be in UpsellGuru. `PENDING_PAYMENT` is used
+        when the hotel requires guests to pay before arrival and the booked extra has not been paid yet.
       enum:
         - CONFIRMED
         - REJECTED
         - PENDING
+        - PENDING_PAYMENT
         - EXPIRED
         - CANCELLED
     ArrayOfBookedExtra:
