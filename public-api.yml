@@ -115,7 +115,48 @@ tags:
 
       ### UPGRADE_BID
 
-      Documented with UP-2464.
+      Sent when an upgrade bid is created, whenever its status changes (see `UpgradeBidStatus` for every
+      status and its meaning) and when its amount is amended. Requires the `upgrade_bids.read` scope.
+
+      `data` is an upgrade bid, in the same shape as an item of `GET /upgrade_bids` (see `UpgradeBid`). Use
+      it, for example, to know that a guest has already bid without polling the listing.
+
+      Accepting a bid sets every other bid on the same reservation to `BYPASSED`, so one acceptance can send
+      several events. A bid created already accepted (instant confirmation, guaranteed upgrade, accepted
+      alternative upgrade) may arrive directly with status `ACCEPTED`.
+
+      ```json
+      {
+        "id": "0c7d3a52-6f1e-4b0a-9f4e-2a8d5b1c9e77",
+        "type": "UPGRADE_BID",
+        "createdAt": "2026-11-20T10:00:03Z",
+        "hotelId": 123,
+        "data": {
+          "id": 981,
+          "createdAt": "2026-11-20 09:58:12",
+          "updatedAt": "2026-11-20 10:00:03",
+          "touchpoint": "PRE_ARRIVAL_UPSELLING",
+          "status": "ACCEPTED",
+          "fromRoomType": { "id": 11, "code": "DBL" },
+          "toRoomType": { "id": 12, "code": "JS" },
+          "amount": { "amount": 90, "currency": "EUR" },
+          "strength": 3,
+          "deniedReason": null,
+          "reservation": {
+            "uuid": "5b2f0c1e-8d3a-4e6f-9a7b-1c2d3e4f5a6b",
+            "status": "CONFIRMED",
+            "checkin": "2026-12-01",
+            "checkout": "2026-12-04",
+            "roomTypeCode": "DBL",
+            "bookedRoomTypeCode": "DBL",
+            "reference": "ABC123",
+            "ratePlan": "BAR",
+            "marketSegment": null,
+            "reservationSource": null
+          }
+        }
+      }
+      ```
 
       ### ROOM_UPGRADE
 
@@ -1692,13 +1733,28 @@ components:
           $ref: "#/components/schemas/UpgradeBidDeniedReason"
     UpgradeBidStatus:
       type: string
-      description: This enum describes all possible status an upgrade bid can be in UpsellGuru
+      description: |
+        This enum describes all possible status an upgrade bid can be in UpsellGuru:
+
+        * `PENDING`: the guest placed the bid and it is waiting for a decision.
+        * `ACCEPTED`: the upgrade is confirmed. Instant-confirmation and guaranteed upgrades are created in this
+          status.
+        * `REJECTED`: the bid was declined; `deniedReason` may say why. Also set when the hotel offers an
+          alternative upgrade instead, or when the guest declines it.
+        * `EXPIRED`: no decision was made before check-in.
+        * `CANCELLED`: the bid or its confirmed upgrade was cancelled, including when the reservation is
+          cancelled or marked as no-show.
+        * `BYPASSED`: another bid on the same reservation was accepted, so this one will not be decided.
+        * `REPLACED`: the bid was accepted, but its upgrade was later replaced by a different upgrade on the same
+          reservation.
       enum:
         - ACCEPTED
         - CANCELLED
         - EXPIRED
         - PENDING
         - REJECTED
+        - BYPASSED
+        - REPLACED
     ValidNewUpgradeBidStatus:
       type: string
       description: This enum describes all possible status an upgrade bid can be submitted to UpsellGuru
