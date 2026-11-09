@@ -160,7 +160,34 @@ tags:
 
       ### ROOM_UPGRADE
 
-      Documented with UP-2465.
+      Sent when a room upgrade is created and whenever it changes: its status (see `RoomUpgradeStatus`),
+      its amount, its room types or the user it is assigned to. When a newer upgrade replaces one on the same
+      reservation, you receive an event for the replaced upgrade (status `REPLACED`) and one for the new
+      upgrade. Requires the `room_upgrades.read` scope.
+
+      `data` is a `RoomUpgrade`, the same shape as an item of `GET /room_upgrades`:
+
+      ```json
+      {
+        "id": "8c2d7f4a-3b1e-4c9a-a6d2-1f0e9b8c7d65",
+        "type": "ROOM_UPGRADE",
+        "createdAt": "2026-11-20T10:00:00+00:00",
+        "hotelId": 123,
+        "data": {
+          "id": 456,
+          "createdAt": "2026-11-20 10:00:00",
+          "updatedAt": "2026-11-20 10:00:00",
+          "touchpoint": "PRE_ARRIVAL_UPSELLING",
+          "status": "CONFIRMED",
+          "user": { "id": 7, "fullName": "Jane Doe" },
+          "fromRoomType": { "id": 1, "code": "DBL" },
+          "toRoomType": { "id": 2, "code": "JSU" },
+          "amount": { "amount": 80, "currency": "EUR" },
+          "reconciliation": { "lastUpdate": null, "status": null, "errors": null, "metadata": null, "user": null },
+          "reservation": { "...": "see ReservationLite" }
+        }
+      }
+      ```
 
       ## Verifying a delivery
 
@@ -400,7 +427,7 @@ paths:
           description: Selects which date field the `dateFrom`/`dateTo` range is applied to. When omitted, the legacy default filter is used.
           schema:
             $ref: '#/components/schemas/DateType'
-      description: Retrieve list of confirmed room upgrades by hotel Id the API account has access to
+      description: Retrieve list of room upgrades, in every status, by hotel Id the API account has access to
       responses:
         '200':
           description: OK
@@ -1838,7 +1865,13 @@ components:
           $ref: "#/components/schemas/ReservationLite"
     RoomUpgradeStatus:
       type: string
-      description: This enum describes all possible status a room upgrade can be in UpsellGuru
+      description: |
+        This enum describes all possible status a room upgrade can be in UpsellGuru.
+        - `CONFIRMED`: the upgrade is sold and applies to the reservation.
+        - `PENDING`: legacy status, no longer produced; treat it as not confirmed.
+        - `CANCELLED`: the upgrade no longer applies, for example because hotel staff or the API cancelled it,
+          its upgrade bid was rejected or cancelled, or the reservation was cancelled or marked as a no-show.
+        - `REPLACED`: a newer upgrade on the same reservation took its place.
       enum:
         - CONFIRMED
         - PENDING
