@@ -63,6 +63,20 @@ tags:
       Changes to the nested `reservation` and `reconciliation` objects do not trigger an event on their own,
       so those fields may be newer in the `GET` listing than in the last event you received.
 
+      ## Event types
+
+      ### BOOKED_EXTRA
+
+      Documented with UP-2463.
+
+      ### UPGRADE_BID
+
+      Documented with UP-2464.
+
+      ### ROOM_UPGRADE
+
+      Documented with UP-2465.
+
       ## Verifying a delivery
 
       Deliveries are signed following the [Standard Webhooks](https://www.standardwebhooks.com)
@@ -2300,9 +2314,12 @@ components:
     WebhookEventType:
       type: string
       description: |
-        Type of a webhook event. `TEST` is only sent through the test endpoint and cannot be subscribed
-        to; the subscribable types are listed here as they become available.
+        Type of a webhook event: one type per resource. `TEST` is only sent through the test endpoint and
+        cannot be subscribed to.
       enum:
+        - BOOKED_EXTRA
+        - UPGRADE_BID
+        - ROOM_UPGRADE
         - TEST
     WebhookEndpointStatus:
       type: string
