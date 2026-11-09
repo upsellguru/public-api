@@ -48,7 +48,7 @@ tags:
       ```json
       {
         "id": "4f0b9e1c-0a4e-4b8e-9d55-6c1f2f3e7a10",
-        "type": "webhook.test",
+        "type": "TEST",
         "createdAt": "2026-11-20T10:00:00Z",
         "hotelId": 123,
         "data": { }
@@ -105,7 +105,7 @@ tags:
 
       ## Testing and monitoring
 
-      `POST /webhook_endpoints/test/{webhookEndpointId}` sends a `webhook.test` event to an active endpoint.
+      `POST /webhook_endpoints/test/{webhookEndpointId}` sends a `TEST` event to an active endpoint.
       `GET /webhook_endpoints/deliveries/{webhookEndpointId}` lists recent deliveries and their outcome,
       newest first. Delivery history is kept for 30 days.
 
@@ -1190,7 +1190,7 @@ paths:
         - webhooks
       operationId: sendWebhookTestEvent
       description: |
-        Queue a `webhook.test` event for an active endpoint. Follow its outcome with the deliveries endpoint.
+        Queue a `TEST` event for an active endpoint. Follow its outcome with the deliveries endpoint.
         Requires the `webhook_endpoints.write` scope.
       parameters:
         - $ref: '#/components/parameters/WebhookEndpointId'
@@ -2294,10 +2294,10 @@ components:
     WebhookEventType:
       type: string
       description: |
-        Type of a webhook event. `webhook.test` is only sent through the test endpoint and cannot be subscribed
+        Type of a webhook event. `TEST` is only sent through the test endpoint and cannot be subscribed
         to; the subscribable types are listed here as they become available.
       enum:
-        - webhook.test
+        - TEST
     WebhookEndpointStatus:
       type: string
       enum:
