@@ -67,7 +67,51 @@ tags:
 
       ### BOOKED_EXTRA
 
-      Documented with UP-2463.
+      Requires the `booked_extras.read` scope. Sent when a booked extra is created, including booked extras
+      created through `POST /booked_extras`, when its status changes (confirmed, rejected, expired, cancelled or
+      reinstated), and when its quantity, amount or assigned user changes.
+
+      `data` is an item of the `GET /booked_extras` listing (see `BookedExtra`):
+
+      ```json
+      {
+        "id": "0d9a7c2e-5b1f-4e0a-8c3d-2f6b9e4a1c75",
+        "type": "BOOKED_EXTRA",
+        "createdAt": "2026-11-20T10:00:00Z",
+        "hotelId": 123,
+        "data": {
+          "id": 98765,
+          "createdAt": "2026-11-19T18:02:11Z",
+          "updatedAt": "2026-11-20T09:59:58Z",
+          "status": "CONFIRMED",
+          "touchpoint": "PRE_ARRIVAL_UPSELLING",
+          "sourceChannel": "EMAIL",
+          "user": { "id": 42, "fullName": "Jane Smith" },
+          "extraType": { "id": 555, "code": "SPA60", "category": "SPA" },
+          "amount": { "amount": 80, "currency": "EUR" },
+          "reconciliation": {
+            "lastUpdate": null,
+            "status": "PENDING",
+            "errors": [],
+            "metadata": [],
+            "user": null
+          },
+          "quantity": 2,
+          "reservation": {
+            "uuid": "6c1e2a9b-3f4d-4e8a-b7c5-1d2e3f4a5b6c",
+            "status": "CONFIRMED",
+            "checkin": "2026-12-01",
+            "checkout": "2026-12-04",
+            "roomTypeCode": "DBL",
+            "bookedRoomTypeCode": "DBL",
+            "reference": "ABC123",
+            "ratePlan": "BAR",
+            "marketSegment": null,
+            "reservationSource": null
+          }
+        }
+      }
+      ```
 
       ### UPGRADE_BID
 
