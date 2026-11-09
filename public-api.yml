@@ -55,8 +55,13 @@ tags:
       }
       ```
 
-      `data` carries the full resource, in the same shape as the matching `GET` endpoint, as it was when the
-      event happened. `hotelId` is `null` for the test event.
+      An event means "this resource changed". `data` carries the resource's current state, in the same shape
+      as an item of the matching `GET` listing, read when the event was processed. It may therefore already
+      include later changes, and two events for the same resource can carry the same state; an identical
+      state is not sent twice in a row. `hotelId` is `null` for the test event.
+
+      Changes to the nested `reservation` and `reconciliation` objects do not trigger an event on their own,
+      so those fields may be newer in the `GET` listing than in the last event you received.
 
       ## Verifying a delivery
 
@@ -89,8 +94,9 @@ tags:
         12 hours and 24 hours after the previous attempt: 8 attempts over about 45 hours. After that the
         delivery is marked `FAILED`. The same event can occasionally arrive more than once, so de-duplicate
         on `id`.
-      * **No ordering guarantee.** Retries and parallel delivery mean events can arrive out of order. Use
-        `createdAt` to order them, or fetch the current state of the resource from the API.
+      * **No ordering guarantee.** Retries and parallel delivery mean events can arrive out of order, so an
+        older state can arrive after a newer one. Upsert by the resource `id` and compare its `updatedAt`, or
+        fetch the resource from the API when you need certainty.
       * **Access.** An endpoint only receives events for hotels its API account can access, and only when the
         account has the read scope of the resource. Access is checked again before every attempt.
 
@@ -2454,14 +2460,14 @@ components:
         createdAt:
           type: string
           format: date-time
-          description: When the event happened (UTC)
+          description: When the event was published (UTC), not when the change happened
         hotelId:
           type: integer
           nullable: true
           description: Hotel the event is about; null for the test event
         data:
           type: object
-          description: The resource the event is about, in the same shape as its `GET` endpoint
+          description: Current state of the resource the event is about, in the same shape as an item of its `GET` listing
   parameters:
     WebhookEndpointId:
       in: path
