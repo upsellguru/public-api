@@ -2354,9 +2354,21 @@ components:
             $ref: "#/components/schemas/WebhookEventType"
         status:
           $ref: "#/components/schemas/WebhookEndpointStatus"
-        consecutiveFailures:
-          type: integer
-          description: Failed attempts since the last acknowledged delivery
+        last24Hours:
+          type: object
+          description: Deliveries attempted in the last 24 hours
+          properties:
+            attempted:
+              type: integer
+              description: Deliveries with at least one attempt in the last 24 hours
+            failed:
+              type: integer
+              description: Of those, deliveries not acknowledged yet, including ones still being retried
+            errorRate:
+              type: number
+              format: float
+              nullable: true
+              description: "`failed` divided by `attempted`, from 0 to 1; null when nothing was attempted"
         pausedAt:
           type: string
           format: date-time
