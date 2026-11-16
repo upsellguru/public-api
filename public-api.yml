@@ -173,7 +173,7 @@ tags:
       {
         "id": "8c2d7f4a-3b1e-4c9a-a6d2-1f0e9b8c7d65",
         "type": "ROOM_UPGRADE",
-        "createdAt": "2026-11-20T10:00:00+00:00",
+        "createdAt": "2026-11-20T10:00:00Z",
         "hotelId": 123,
         "data": {
           "id": 456,
